@@ -1,6 +1,6 @@
 $(document).ready(function () {
     let output = $('.output');
-    let input = $('input.input');
+    let input = ($('input.input'));
     let toOutput;
     let userIP = $('#user-ip');
 
@@ -62,13 +62,17 @@ $(document).ready(function () {
     }
     function help() {
         let commandsArray = ['Help: List of available commands', '>help', '>about', '>contact', '>ping', '>time', '>clear', '>say'];
+        seperator();
         for (let i = 0; i < commandsArray.length; i++) {
             let out = `<span>  ${commandsArray[i]} </span><br/>`
             Output(out);
         }
+        seperator();
     }
     function pong() {
+        seperator();
         Output(`<span>pong</span></br><span class="pong"><b class="left">|</b><b class="right">|</b></span></br>`);
+        seperator();
     }
     function sayThis(data) {
         data = data.substr(data.indexOf(' ') + 1);
@@ -77,7 +81,7 @@ $(document).ready(function () {
     function sudo(data) {
         data = data.substr(data.indexOf(' ') + 1);
         if (data.startsWith("say") === true) {
-            data = `Not gona   ${data} +  to you, you don't own me!`
+            data = `Not gona ${data} +  to you, you don't own me!`
         } else if (data.startsWith("apt-get") === true) {
             data = `<span class='green'>Updating...</span> The cake is a lie! There is nothing to update...`
         } else {
@@ -86,7 +90,9 @@ $(document).ready(function () {
         Output(`<span> ${data} </span></br>`);
     }
     function getTime() {
+        seperator();
         Output(`<span>It's the 21st century man! Get a Watch.</span></br>`);
+        seperator();
     }
     function aboutMe() {
         let aboutMeArray = [`About:<br>
