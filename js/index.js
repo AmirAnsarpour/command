@@ -79,9 +79,7 @@ $(document).ready(function () {
     }
     function sudo(data) {
         data = data.substr(data.indexOf(' ') + 1);
-        if (data.startsWith("say") === true) {
-            data = `Not gona ${data} +  to you, you don't own me!`
-        } else if (data.startsWith("apt-get") === true) {
+        if (data.startsWith("apt-get") === true) {
             data = `<span class='green'>Updating...</span> The cake is a lie! There is nothing to update...`
         } else {
             data = `The force is week within you, my master you not be!`
