@@ -62,7 +62,6 @@ $(document).ready(function () {
     }
     function help() {
         let commandsArray = ['Help: List of available commands', '>help', '>about', '>contact', '>ping', '>time', '>clear', '>say'];
-        seperator();
         for (let i = 0; i < commandsArray.length; i++) {
             let out = `<span>  ${commandsArray[i]} </span><br/>`
             Output(out);
@@ -70,7 +69,6 @@ $(document).ready(function () {
         seperator();
     }
     function pong() {
-        seperator();
         Output(`<span>pong</span></br><span class="pong"><b class="left">|</b><b class="right">|</b></span></br>`);
         seperator();
     }
@@ -90,7 +88,6 @@ $(document).ready(function () {
         Output(`<span> ${data} </span></br>`);
     }
     function getTime() {
-        seperator();
         Output(`<span>It's the 21st century man! Get a Watch.</span></br>`);
         seperator();
     }
@@ -98,7 +95,6 @@ $(document).ready(function () {
         let aboutMeArray = [`About:<br>
         Hey there!
          I'm AmirAnsarpour, a web wizard who loves to craft beautiful digital experiences. Front-end development is my jam, especially with React. I also dabble with Microsoft servers. Born in Dezful, Iran, in '2003, I've been blessed with a creative mind.<br> My friends call me a creative genius, but I'll leave that up to you to decide. Let's team up and create something extraordinary together!`];
-        seperator();
         for (let i = 0; i < aboutMeArray.length; i++) {
             let out = `<span>  ${aboutMeArray[i]} '</span><br/>`
             Output(out);
@@ -107,7 +103,6 @@ $(document).ready(function () {
     }
     function contactMe() {
         let contactArray = ['>Contact:', '(<a href="https://github.com/AmirAnsarpour">GitHub</a>)', '(<a href="https://www.linkedin.com/in/amiransarpour">linkedin</a>)', '(<a href="https://instagram.com/Amrix.Sf">instagram</a>)'];
-        seperator();
         for (let i = 0; i < contactArray.length; i++) {
             let out = '<span>' + contactArray[i] + '</span><br/>'
             Output(out);
