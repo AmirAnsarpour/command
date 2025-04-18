@@ -3,41 +3,346 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>command</title>
-    <link rel="stylesheet" href="css/index.min.css">
+    <link rel="icon" href="./icon.png" type="image/png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF6B00',
+                        dark: '#000000',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500&display=swap");
+        
+        /* Glass background styles */
+        .noise-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        
+        .noise-element {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9));
+            opacity: 0.5;
+        }
+        
+        .noise-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.08;
+            animation: noise-movement 8s infinite alternate;
+        }
+        
+        .glowing-orbs {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            animation: orb-movement 20s infinite alternate;
+        }
+        
+        .orb:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            width: 300px;
+            height: 300px;
+            background-color: #FF6B00;
+            animation-delay: 0s;
+        }
+        
+        .orb:nth-child(2) {
+            top: 50%;
+            left: 60%;
+            width: 400px;
+            height: 400px;
+            background-color: #3d0099;
+            animation-delay: -5s;
+        }
+        
+        .orb:nth-child(3) {
+            top: 70%;
+            left: 20%;
+            width: 350px;
+            height: 350px;
+            background-color: #006666;
+            animation-delay: -10s;
+        }
+        
+        @keyframes noise-movement {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            25% {
+                transform: translate(-1%, -1%) scale(1.01);
+            }
+            50% {
+                transform: translate(1%, 1%) scale(0.99);
+            }
+            75% {
+                transform: translate(-1%, 1%) scale(1.01);
+            }
+            100% {
+                transform: translate(1%, -1%) scale(0.99);
+            }
+        }
+        
+        @keyframes orb-movement {
+            0% {
+                transform: translate(0, 0);
+            }
+            33% {
+                transform: translate(-5%, 5%);
+            }
+            66% {
+                transform: translate(5%, -5%);
+            }
+            100% {
+                transform: translate(-5%, -5%);
+            }
+        }
+        
+        body {
+            font-family: 'Fira Code', monospace;
+            background-color: #000000;
+            color: #f8f8f8;
+            overscroll-behavior: none; /* Prevent bounce effect on mobile */
+        }
+        
+        .terminal {
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 1px solid #333333;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+        
+        ::selection {
+            background-color: #FF6B00;
+            color: #000000;
+        }
+        
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background-color: #FF6B00;
+            animation: blink 1s step-end infinite;
+        }
+        
+        @keyframes blink {
+            from, to { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        .ascii-art {
+            color: #FF6B00;
+            line-height: 1;
+            white-space: pre;
+            font-size: 0.4rem;
+            letter-spacing: -0.05em;
+            transform: scale(0.95);
+            transform-origin: left top;
+        }
+        
+        @media (min-width: 640px) {
+            .ascii-art {
+                font-size: 0.5rem;
+            }
+        }
+        
+        .output {
+            max-height: 70vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+        
+        /* Mobile optimization styles */
+        .quick-commands {
+            display: flex;
+            overflow-x: auto;
+            scrollbar-width: none; /* Hide scrollbar Firefox */
+            -ms-overflow-style: none; /* Hide scrollbar IE/Edge */
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x mandatory;
+            gap: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        
+        .quick-commands::-webkit-scrollbar {
+            display: none; /* Hide scrollbar Chrome/Safari/Opera */
+        }
+        
+        .quick-command-btn {
+            scroll-snap-align: start;
+            white-space: nowrap;
+            flex-shrink: 0;
+            background-color: rgba(255, 107, 0, 0.1);
+            color: #FF6B00;
+            border: 1px solid rgba(255, 107, 0, 0.2);
+            border-radius: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+        
+        .quick-command-btn:active {
+            background-color: rgba(255, 107, 0, 0.3);
+            transform: scale(0.95);
+        }
+        
+        /* Add tap highlight color for mobile */
+        a, button, .quick-command-btn {
+            -webkit-tap-highlight-color: rgba(255, 107, 0, 0.2);
+        }
+        
+        /* Better focus styles for keyboard navigation */
+        .input:focus {
+            outline: none;
+            border-bottom: 1px solid rgba(255, 107, 0, 0.5);
+        }
+    </style>
 </head>
 
-<body>
-    <div class="console">
-        <div class="output">
-            <div id="change-screen">
-                <p>Change Your Screen</p>
-            </div>
-            <span>version 1.0.0</span><br />
-            <span class="green">(c) AmirAnsarpour Corporation. All rights reserved. <span class="blue">just
-                    kidding XD</span></span><br />
-            <span class=" seperator">== == == == == == == == == == == == == == == == == ==</span></br>
-            <pre contenteditable="false">
-  ___ ____   __  ___  _____  _____   ___ ____  __   __ _______  ____   _____  _____  ______  ___   _______
-  ___    |__   |/  /___  _/__  __ \  ___    |__  | / /_  ___/__    |__  __ \__  __ \_  __ \_  / / /__  __ \
-  __  /| |_  /|_/ / __  / __  /_/ /  __  /| |_   |/ /_____ \__  /| |_  /_/ /_  /_/ /  / / /  / / /__  /_/ /
-  _  ___ |  /  / / __/ /  _  _, _/   _  ___ |  /|  / ____/ /_  ___ |  _, _/_  ____// /_/ // /_/ / _  _, _/ 
-  /_/  |_/_/  /_/  /___/  /_/ |_|    /_/  |_/_/ |_/  /____/ /_/  |_/_/ |_| /_/     \____/ \____/  /_/ |_|
-
-</pre>
-            <span class="blue">type '<span class="grey">help</span>' to see a list of comands available<br /> or '<span
-                    class="grey">contact</span>' for a list of ways to contact me.</span><br>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <!-- Glass background effect -->
+    <div class="noise-container">
+        <div class="glowing-orbs">
+            <div class="orb"></div>
+            <div class="orb"></div>
+            <div class="orb"></div>
         </div>
-        <div class="action">
-            <span>
-                <p id="user-ip" class="">▒▒▒▒▒▒▒▒▒▒▒▒▒▒</p> >
+        <div class="noise-element"></div>
+        <div class="noise-overlay"></div>
+    </div>
+    
+    <div class="terminal w-full max-w-3xl rounded overflow-hidden shadow-md">
+        <div class="p-2 bg-black/80 border-b border-gray-800 flex items-center justify-between">
+            <div class="text-xs text-gray-500">command v2.0.0</div>
+            <button id="help-btn" class="text-xs text-primary px-2 py-1 rounded hover:bg-primary/10" aria-label="Show help">Help</button>
+        </div>
+        
+        <div class="output p-4">
+            <div id="change-screen" class="hidden">
+                <p class="text-primary">Change Your Screen</p>
+            </div>
+            
+            <div class="hidden md:block overflow-x-auto mb-4">
+                <pre class="ascii-art">             ,.-:~:-.                           _             _                   ',:'/¯/`:,       .:'/*/'`:,·:~·–:.,           
+           /':::::::::'`,                   ,·´/:::::'`:,   ,:´/::::'`:,'             /:/_/::::/';'    /::/:/:::/:::;::::::/`':.,'     
+         /;:-·~·-:;':::',                '/  /:::::::::'`·/::/::::::::/'\           /:'     '`:/::;' /·*'`·´¯'`^·-~·:–-'::;:::'`;    
+       ,'´          '`:;::`,              /,·'´ ¯¯'`·;:::/:;·´ ¯ '`·;/:::i         ;         ';:';' '\                       '`;::'i'  
+      /                `;::\           /            '`;':/            \:::';        |         'i::i    '`;        ,– .,        'i:'/   
+    ,'                   '`,::;       ,'               `'               ';:::i°      ';        ;'::i      i       i':/:::';       ;/'    
+   i'       ,';´'`;         '\:::', '  ,'                                  ;::i''      'i        'i::i'      i       i/:·'´       ,:''      
+ ,'        ;' /´:`';         ';:::'i'  ;'       ,^,         ,:^,          'i::;°       ;       'i::;'      '; '    ,:,     ~;'´:::'`:,   
+ ;        ;/:;::;:';         ',:::; 'i        ;:::\       ;/   ',         'i:;'        ';       i:/'       'i      i:/\       `;::::/:'`;'
+'i        '´        `'         'i::'/ 'i       'i::/  \     /      ;        ;/           ';     ;/ °        ;     ;/   \       '`:/::::/'
+¦       '/`' *^~-·'´\         ';'/'‚  ;      'i:/     `*'´       'i       ;/ °           ';   / °          ';   ,'       \         '`;/' 
+'`., .·´              `·.,_,.·´  ‚  '`.    ,'                   '.     /                `'´       °       `'*´          '`~·-·^'´    
+                                       `*´                      `'*'´                   '                                           </pre>
+            </div>
+            
+            <div class="md:hidden mb-4">
+                <div class="bg-primary/10 text-primary text-center py-3 px-2 rounded border border-primary/20">
+                    <span class="text-xs">[ Command Terminal ]</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile quick commands -->
+        <div class="md:hidden px-4 mb-3">
+            <div class="quick-commands">
+                <button class="quick-command-btn" data-command="help">help</button>
+                <button class="quick-command-btn" data-command="about">about</button>
+                <button class="quick-command-btn" data-command="pajamas">pajamas</button>
+                <button class="quick-command-btn" data-command="joke">joke</button>
+                <button class="quick-command-btn" data-command="weather">weather</button>
+                <button class="quick-command-btn" data-command="time">time</button>
+                <button class="quick-command-btn" data-command="clear">clear</button>
+            </div>
+        </div>
+        
+        <div class="p-3 border-t border-gray-800 flex items-center bg-black/80">
+            <span class="flex items-center mr-2">
+                <p id="user-ip" class="text-primary mr-2 text-sm">▒▒▒▒▒▒▒▒▒▒▒▒▒▒</p>
+                <span class="text-primary mr-1">&gt;</span>
             </span>
-            <input class="input" name="input" maxlength="20" placeholder="type..."></input>
+            <input class="input bg-transparent border-none focus:outline-none flex-1 text-white text-sm" name="input" maxlength="50" placeholder="type..." autocomplete="off">
+            <span class="cursor"></span>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js"></script>
     <script src="js/index.js"></script>
+    <script>
+        // Mobile optimization JavaScript
+        $(document).ready(function() {
+            // Quick command buttons
+            $('.quick-command-btn').on('click touchend', function(e) {
+                e.preventDefault();
+                const command = $(this).data('command');
+                $('.input').val(command);
+                // Trigger Enter key event to execute command
+                const event = $.Event('keypress');
+                event.which = 13; // Enter key code
+                $('.input').trigger(event);
+            });
+            
+            // Help button
+            $('#help-btn').on('click touchend', function(e) {
+                e.preventDefault();
+                $('.input').val('help');
+                const event = $.Event('keypress');
+                event.which = 13;
+                $('.input').trigger(event);
+            });
+            
+            // Autofocus input field on desktop, but not on mobile to avoid keyboard popup
+            if (window.innerWidth > 768) {
+                $('.input').focus();
+            }
+            
+            // Re-focus input when clicking/tapping on the terminal
+            $('.terminal').on('click touchend', function(e) {
+                // Only focus if not clicking on a button, link or input field
+                if (!$(e.target).is('button, a, input, .quick-command-btn')) {
+                    $('.input').focus();
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
