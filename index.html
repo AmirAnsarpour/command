@@ -1,348 +1,631 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>command</title>
-    <link rel="icon" href="./icon.png" type="image/png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#FF6B00',
-                        dark: '#000000',
-                    }
-                }
-            }
-        }
-    </script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>command — system control</title>
+    <link rel="icon" href="./icon.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        @import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500&display=swap");
-        
-        /* Glass background styles */
-        .noise-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: -1;
-        }
-        
-        .noise-element {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9));
-            opacity: 0.5;
-        }
-        
-        .noise-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-            opacity: 0.08;
-            animation: noise-movement 8s infinite alternate;
-        }
-        
-        .glowing-orbs {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-        
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.15;
-            animation: orb-movement 20s infinite alternate;
-        }
-        
-        .orb:nth-child(1) {
-            top: 20%;
-            left: 10%;
-            width: 300px;
-            height: 300px;
-            background-color: #FF6B00;
-            animation-delay: 0s;
-        }
-        
-        .orb:nth-child(2) {
-            top: 50%;
-            left: 60%;
-            width: 400px;
-            height: 400px;
-            background-color: #3d0099;
-            animation-delay: -5s;
-        }
-        
-        .orb:nth-child(3) {
-            top: 70%;
-            left: 20%;
-            width: 350px;
-            height: 350px;
-            background-color: #006666;
-            animation-delay: -10s;
-        }
-        
-        @keyframes noise-movement {
-            0% {
-                transform: translate(0, 0) scale(1);
-            }
-            25% {
-                transform: translate(-1%, -1%) scale(1.01);
-            }
-            50% {
-                transform: translate(1%, 1%) scale(0.99);
-            }
-            75% {
-                transform: translate(-1%, 1%) scale(1.01);
-            }
-            100% {
-                transform: translate(1%, -1%) scale(0.99);
-            }
-        }
-        
-        @keyframes orb-movement {
-            0% {
-                transform: translate(0, 0);
-            }
-            33% {
-                transform: translate(-5%, 5%);
-            }
-            66% {
-                transform: translate(5%, -5%);
-            }
-            100% {
-                transform: translate(-5%, -5%);
-            }
-        }
-        
-        body {
-            font-family: 'Fira Code', monospace;
-            background-color: #000000;
-            color: #f8f8f8;
-            overscroll-behavior: none; /* Prevent bounce effect on mobile */
-        }
-        
-        .terminal {
-            background-color: rgba(0, 0, 0, 0.8);
-            border: 1px solid #333333;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-        }
-        
-        ::selection {
-            background-color: #FF6B00;
-            color: #000000;
-        }
-        
-        .cursor {
-            display: inline-block;
-            width: 10px;
-            height: 18px;
-            background-color: #FF6B00;
-            animation: blink 1s step-end infinite;
-        }
-        
-        @keyframes blink {
-            from, to { opacity: 1; }
-            50% { opacity: 0; }
-        }
-        
-        .ascii-art {
-            color: #FF6B00;
-            line-height: 1;
-            white-space: pre;
-            font-size: 0.4rem;
-            letter-spacing: -0.05em;
-            transform: scale(0.95);
-            transform-origin: left top;
-        }
-        
-        @media (min-width: 640px) {
-            .ascii-art {
-                font-size: 0.5rem;
-            }
-        }
-        
-        .output {
-            max-height: 70vh;
-            overflow-y: auto;
-            overflow-x: hidden;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-        }
-        
-        /* Mobile optimization styles */
-        .quick-commands {
-            display: flex;
-            overflow-x: auto;
-            scrollbar-width: none; /* Hide scrollbar Firefox */
-            -ms-overflow-style: none; /* Hide scrollbar IE/Edge */
-            -webkit-overflow-scrolling: touch;
-            scroll-snap-type: x mandatory;
-            gap: 0.5rem;
-            padding-bottom: 0.5rem;
-        }
-        
-        .quick-commands::-webkit-scrollbar {
-            display: none; /* Hide scrollbar Chrome/Safari/Opera */
-        }
-        
-        .quick-command-btn {
-            scroll-snap-align: start;
-            white-space: nowrap;
-            flex-shrink: 0;
-            background-color: rgba(255, 107, 0, 0.1);
-            color: #FF6B00;
-            border: 1px solid rgba(255, 107, 0, 0.2);
-            border-radius: 0.25rem;
-            padding: 0.25rem 0.75rem;
-            font-size: 0.75rem;
-            transition: all 0.2s ease;
-            touch-action: manipulation;
-        }
-        
-        .quick-command-btn:active {
-            background-color: rgba(255, 107, 0, 0.3);
-            transform: scale(0.95);
-        }
-        
-        /* Add tap highlight color for mobile */
-        a, button, .quick-command-btn {
-            -webkit-tap-highlight-color: rgba(255, 107, 0, 0.2);
-        }
-        
-        /* Better focus styles for keyboard navigation */
-        .input:focus {
-            outline: none;
-            border-bottom: 1px solid rgba(255, 107, 0, 0.5);
-        }
-    </style>
-</head>
+      /* ── RESET ─────────────────────────────── */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-<body class="flex items-center justify-center min-h-screen p-4">
-    <!-- Glass background effect -->
-    <div class="noise-container">
-        <div class="glowing-orbs">
-            <div class="orb"></div>
-            <div class="orb"></div>
-            <div class="orb"></div>
+      /* ── DESIGN TOKENS ─────────────────────── */
+      :root {
+        --bg: #0d0d0d;
+        --bg2: #111111;
+        --bg3: #171717;
+        --border: #222222;
+        --bv: #2e2e2e; /* visible border */
+        --text: #b4b4b4;
+        --dim: #484848;
+        --bright: #e2e2e2;
+        --green: #4caf50;
+        --amber: #c8960a;
+        --cyan: #4db6ac;
+        --red: #c62828;
+        --font: "Fira Code", "Courier New", monospace;
+      }
+
+      /* ── BASE ──────────────────────────────── */
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        font-family: var(--font);
+        font-size: 13px;
+        background: var(--bg);
+        color: var(--text);
+        overflow: hidden;
+        overscroll-behavior: none;
+      }
+
+      a {
+        color: var(--cyan);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+
+      ::selection {
+        background: var(--green);
+        color: #000;
+      }
+
+      /* ── LAYOUT ────────────────────────────── */
+      .shell {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+
+      .content {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+        min-height: 0;
+      }
+
+      /* ── TOPBAR ────────────────────────────── */
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 10px;
+        height: 22px;
+        background: var(--green);
+        color: #000;
+        font-size: 12px;
+        font-weight: 600;
+        flex-shrink: 0;
+        user-select: none;
+      }
+
+      .tb-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .tb-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .tb-sep {
+        opacity: 0.35;
+      }
+
+      /* ── SIDEBAR ───────────────────────────── */
+      .sidebar {
+        width: 196px;
+        flex-shrink: 0;
+        background: var(--bg2);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-width: none;
+        font-size: 11px;
+      }
+
+      .sidebar::-webkit-scrollbar {
+        display: none;
+      }
+
+      .sb-sec {
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .sb-hdr {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--dim);
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        margin-bottom: 7px;
+      }
+
+      .sb-hdr::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+
+      /* Stat rows */
+      .st {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 3px;
+        font-size: 10px;
+      }
+
+      .st-lbl {
+        color: var(--dim);
+      }
+      .st-val {
+        color: var(--cyan);
+      }
+      .st-val.ok {
+        color: var(--green);
+      }
+
+      /* ── TERMINAL ──────────────────────────── */
+      .term-wrap {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        background: var(--bg);
+      }
+
+      .output {
+        flex: 1;
+        padding: 10px 14px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        line-height: 1.6;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+      }
+
+      .output::-webkit-scrollbar {
+        width: 4px;
+      }
+      .output::-webkit-scrollbar-thumb {
+        background: var(--bv);
+      }
+
+      /* mobile quick commands */
+      .qc-bar {
+        display: none;
+        overflow-x: auto;
+        gap: 4px;
+        padding: 6px 10px;
+        border-top: 1px solid var(--border);
+        background: var(--bg2);
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .qc-bar::-webkit-scrollbar {
+        display: none;
+      }
+
+      .qc-btn {
+        flex-shrink: 0;
+        font-family: var(--font);
+        font-size: 10px;
+        color: var(--green);
+        background: transparent;
+        border: 1px solid var(--bv);
+        padding: 3px 9px;
+        cursor: pointer;
+        white-space: nowrap;
+        touch-action: manipulation;
+      }
+
+      .qc-btn:hover,
+      .qc-btn:active {
+        background: var(--bg3);
+      }
+
+      /* ── INPUT BAR ─────────────────────────── */
+      .input-bar {
+        display: flex;
+        align-items: center;
+        padding: 5px 14px;
+        border-top: 1px solid var(--border);
+        background: var(--bg2);
+        flex-shrink: 0;
+        gap: 0;
+      }
+
+      .prompt {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        user-select: none;
+      }
+
+      .p-user {
+        color: var(--green);
+      }
+      .p-host {
+        color: var(--dim);
+      }
+      .p-path {
+        color: var(--bright);
+      }
+      .p-sym {
+        color: var(--green);
+        margin-right: 6px;
+      }
+
+      .input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        font-family: var(--font);
+        font-size: 13px;
+        color: var(--bright);
+        caret-color: var(--green);
+      }
+
+      .input::placeholder {
+        color: var(--dim);
+      }
+
+      .cursor {
+        display: inline-block;
+        width: 8px;
+        height: 15px;
+        background: var(--green);
+        animation: blink 1s step-end infinite;
+        flex-shrink: 0;
+      }
+
+      @keyframes blink {
+        from,
+        to {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+
+      /* ── BOTTOMBAR ─────────────────────────── */
+      .bottombar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 10px;
+        height: 20px;
+        background: var(--bg3);
+        border-top: 1px solid var(--border);
+        font-size: 10px;
+        color: var(--dim);
+        flex-shrink: 0;
+        user-select: none;
+      }
+
+      .bb-keys {
+        display: flex;
+        gap: 12px;
+      }
+      .bb-key {
+        color: var(--text);
+      }
+
+      /* ── OUTPUT CONTENT STYLES ─────────────── */
+      .out-line {
+        display: block;
+      }
+
+      .c-green {
+        color: var(--green);
+      }
+      .c-amber {
+        color: var(--amber);
+      }
+      .c-cyan {
+        color: var(--cyan);
+      }
+      .c-red {
+        color: var(--red);
+      }
+      .c-dim {
+        color: var(--dim);
+      }
+      .c-bright {
+        color: var(--bright);
+      }
+
+      /* Command echo */
+      .out-cmd {
+        color: var(--dim);
+        margin-bottom: 2px;
+      }
+      .out-cmd .ps {
+        color: var(--green);
+      }
+
+      /* Section divider */
+      .out-sep {
+        display: block;
+        height: 1px;
+        background: var(--border);
+        margin: 6px 0;
+      }
+
+      /* Structured output panel */
+      .out-panel {
+        border: 1px solid var(--bv);
+        margin: 4px 0 10px;
+      }
+
+      .out-panel-hdr {
+        background: var(--bg3);
+        padding: 3px 10px;
+        border-bottom: 1px solid var(--bv);
+        color: var(--bright);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+      }
+
+      .out-panel-body {
+        padding: 8px 10px;
+      }
+
+      /* Key-value rows inside panel */
+      .out-kv {
+        display: grid;
+        grid-template-columns: 90px 1fr;
+        gap: 1px 10px;
+        margin-bottom: 2px;
+        font-size: 12px;
+      }
+
+      .out-kv-k {
+        color: var(--dim);
+      }
+      .out-kv-v {
+        color: var(--text);
+      }
+
+      /* Inline badge */
+      .badge-ok {
+        color: var(--green);
+      }
+      .badge-err {
+        color: var(--red);
+      }
+
+      /* Contact endpoint rows */
+      .ep-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 4px 0;
+        border-bottom: 1px solid var(--border);
+        text-decoration: none;
+        color: var(--text);
+        font-size: 12px;
+      }
+
+      .ep-link:last-child {
+        border-bottom: none;
+      }
+      .ep-link:hover {
+        color: var(--bright);
+      }
+      .ep-link:hover .ep-url {
+        color: var(--bright);
+      }
+
+      .ep-site {
+        min-width: 76px;
+        color: var(--bright);
+      }
+      .ep-url {
+        color: var(--cyan);
+        font-size: 11px;
+      }
+
+      /* Weather card */
+      .wx-card {
+        border: 1px solid var(--bv);
+        padding: 8px 10px;
+        margin: 4px 0;
+      }
+
+      .wx-temp {
+        font-size: 22px;
+        color: var(--bright);
+        font-weight: 500;
+      }
+
+      /* Joke container */
+      .joke-body {
+        border-left: 2px solid var(--bv);
+        padding: 4px 10px;
+        color: var(--amber);
+        margin: 4px 0;
+        font-size: 12px;
+      }
+
+      /* ── RESPONSIVE ────────────────────────── */
+      @media (max-width: 768px) {
+        body {
+          overflow: auto;
+        }
+        .sidebar {
+          display: none !important;
+        }
+        .qc-bar {
+          display: flex;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <!-- ── TOPBAR ── -->
+      <div class="topbar">
+        <div class="tb-left">
+          <span id="tb-user">root@ansarpour</span>
+          <span class="tb-sep">│</span>
+          <span>~/command</span>
+          <span class="tb-sep">│</span>
+          <span>v2.0.0</span>
         </div>
-        <div class="noise-element"></div>
-        <div class="noise-overlay"></div>
-    </div>
-    
-    <div class="terminal w-full max-w-3xl rounded overflow-hidden shadow-md">
-        <div class="p-2 bg-black/80 border-b border-gray-800 flex items-center justify-between">
-            <div class="text-xs text-gray-500">command v2.0.0</div>
-            <button id="help-btn" class="text-xs text-primary px-2 py-1 rounded hover:bg-primary/10" aria-label="Show help">Help</button>
+        <div class="tb-right">
+          <span id="tb-uptime">UP 0:00:00</span>
+          <span class="tb-sep">│</span>
+          <span id="tb-clock">--:--:--</span>
         </div>
-        
-        <div class="output p-4">
-            <div id="change-screen" class="hidden">
-                <p class="text-primary">Change Your Screen</p>
+      </div>
+
+      <!-- ── CONTENT ── -->
+      <div class="content">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+          <!-- Session -->
+          <div class="sb-sec">
+            <div class="sb-hdr">session</div>
+            <div class="st">
+              <span class="st-lbl">ip</span
+              ><span class="st-val" id="sb-ip" style="font-size: 9.5px"
+                >resolving…</span
+              >
             </div>
-            
-            <div class="hidden md:block overflow-x-auto mb-4">
-                <pre class="ascii-art">             ,.-:~:-.                           _             _                   ',:'/¯/`:,       .:'/*/'`:,·:~·–:.,           
-           /':::::::::'`,                   ,·´/:::::'`:,   ,:´/::::'`:,'             /:/_/::::/';'    /::/:/:::/:::;::::::/`':.,'     
-         /;:-·~·-:;':::',                '/  /:::::::::'`·/::/::::::::/'\           /:'     '`:/::;' /·*'`·´¯'`^·-~·:–-'::;:::'`;    
-       ,'´          '`:;::`,              /,·'´ ¯¯'`·;:::/:;·´ ¯ '`·;/:::i         ;         ';:';' '\                       '`;::'i'  
-      /                `;::\           /            '`;':/            \:::';        |         'i::i    '`;        ,– .,        'i:'/   
-    ,'                   '`,::;       ,'               `'               ';:::i°      ';        ;'::i      i       i':/:::';       ;/'    
-   i'       ,';´'`;         '\:::', '  ,'                                  ;::i''      'i        'i::i'      i       i/:·'´       ,:''      
- ,'        ;' /´:`';         ';:::'i'  ;'       ,^,         ,:^,          'i::;°       ;       'i::;'      '; '    ,:,     ~;'´:::'`:,   
- ;        ;/:;::;:';         ',:::; 'i        ;:::\       ;/   ',         'i:;'        ';       i:/'       'i      i:/\       `;::::/:'`;'
-'i        '´        `'         'i::'/ 'i       'i::/  \     /      ;        ;/           ';     ;/ °        ;     ;/   \       '`:/::::/'
-¦       '/`' *^~-·'´\         ';'/'‚  ;      'i:/     `*'´       'i       ;/ °           ';   / °          ';   ,'       \         '`;/' 
-'`., .·´              `·.,_,.·´  ‚  '`.    ,'                   '.     /                `'´       °       `'*´          '`~·-·^'´    
-                                       `*´                      `'*'´                   '                                           </pre>
+            <div class="st">
+              <span class="st-lbl">shell</span
+              ><span class="st-val">bash 5.2</span>
             </div>
-            
-            <div class="md:hidden mb-4">
-                <div class="bg-primary/10 text-primary text-center py-3 px-2 rounded border border-primary/20">
-                    <span class="text-xs">[ Command Terminal ]</span>
-                </div>
+            <div class="st">
+              <span class="st-lbl">term</span
+              ><span class="st-val">xterm-256</span>
             </div>
-        </div>
-        
-        <!-- Mobile quick commands -->
-        <div class="md:hidden px-4 mb-3">
-            <div class="quick-commands">
-                <button class="quick-command-btn" data-command="help">help</button>
-                <button class="quick-command-btn" data-command="about">about</button>
-                <button class="quick-command-btn" data-command="pajamas">pajamas</button>
-                <button class="quick-command-btn" data-command="joke">joke</button>
-                <button class="quick-command-btn" data-command="weather">weather</button>
-                <button class="quick-command-btn" data-command="time">time</button>
-                <button class="quick-command-btn" data-command="clear">clear</button>
+            <div class="st">
+              <span class="st-lbl">up</span
+              ><span class="st-val" id="sb-uptime">0:00:00</span>
             </div>
-        </div>
-        
-        <div class="p-3 border-t border-gray-800 flex items-center bg-black/80">
-            <span class="flex items-center mr-2">
-                <p id="user-ip" class="text-primary mr-2 text-sm">▒▒▒▒▒▒▒▒▒▒▒▒▒▒</p>
-                <span class="text-primary mr-1">&gt;</span>
+          </div>
+        </aside>
+
+        <!-- TERMINAL -->
+        <div class="term-wrap">
+          <div class="output" id="output"></div>
+
+          <!-- Mobile quick commands -->
+          <div class="qc-bar" id="qc-bar">
+            <button class="qc-btn" data-command="help">help</button>
+            <button class="qc-btn" data-command="about">about</button>
+            <button class="qc-btn" data-command="contact">contact</button>
+            <button class="qc-btn" data-command="joke">joke</button>
+            <button class="qc-btn" data-command="weather">weather</button>
+            <button class="qc-btn" data-command="time">time</button>
+            <button class="qc-btn" data-command="clear">clear</button>
+          </div>
+
+          <!-- Input -->
+          <div class="input-bar">
+            <span class="prompt">
+              <span class="p-user" id="user-ip">root</span
+              ><span class="p-host">@ansarpour</span
+              ><span class="p-path">:~</span><span class="p-sym">$&nbsp;</span>
             </span>
-            <input class="input bg-transparent border-none focus:outline-none flex-1 text-white text-sm" name="input" maxlength="50" placeholder="type..." autocomplete="off">
+            <input
+              class="input"
+              name="input"
+              maxlength="80"
+              placeholder=""
+              autocomplete="off"
+              spellcheck="false"
+            />
             <span class="cursor"></span>
+          </div>
         </div>
+      </div>
+
+      <!-- ── BOTTOMBAR ── -->
+      <div class="bottombar">
+        <div class="bb-keys">
+          <span><span class="bb-key">^L</span>&nbsp;clear</span>
+          <span><span class="bb-key">F1</span>&nbsp;help</span>
+          <span><span class="bb-key">↑↓</span>&nbsp;history</span>
+          <span><span class="bb-key">Tab</span>&nbsp;complete</span>
+        </div>
+        <span id="bb-status" style="color: var(--green)">ready</span>
+      </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js"></script>
     <script src="js/index.js"></script>
     <script>
-        // Mobile optimization JavaScript
-        $(document).ready(function() {
-            // Quick command buttons
-            $('.quick-command-btn').on('click touchend', function(e) {
-                e.preventDefault();
-                const command = $(this).data('command');
-                $('.input').val(command);
-                // Trigger Enter key event to execute command
-                const event = $.Event('keypress');
-                event.which = 13; // Enter key code
-                $('.input').trigger(event);
-            });
-            
-            // Help button
-            $('#help-btn').on('click touchend', function(e) {
-                e.preventDefault();
-                $('.input').val('help');
-                const event = $.Event('keypress');
-                event.which = 13;
-                $('.input').trigger(event);
-            });
-            
-            // Autofocus input field on desktop, but not on mobile to avoid keyboard popup
-            if (window.innerWidth > 768) {
-                $('.input').focus();
-            }
-            
-            // Re-focus input when clicking/tapping on the terminal
-            $('.terminal').on('click touchend', function(e) {
-                // Only focus if not clicking on a button, link or input field
-                if (!$(e.target).is('button, a, input, .quick-command-btn')) {
-                    $('.input').focus();
-                }
-            });
-        });
-    </script>
-</body>
+      /* ── SYSTEM RUNTIME ────────────────────── */
 
+      // Clock
+      (function clockTick() {
+        const n = new Date(),
+          p = (v) => String(v).padStart(2, "0");
+        document.getElementById("tb-clock").textContent =
+          p(n.getHours()) + ":" + p(n.getMinutes()) + ":" + p(n.getSeconds());
+        setTimeout(clockTick, 1000);
+      })();
+
+      // Uptime
+      let upSec = 0;
+      setInterval(function () {
+        upSec++;
+        const p = (v) => String(v).padStart(2, "0");
+        const h = Math.floor(upSec / 3600);
+        const m = p(Math.floor((upSec % 3600) / 60));
+        const s = p(upSec % 60);
+        const ts = h + ":" + m + ":" + s;
+        document.getElementById("tb-uptime").textContent = "UP " + ts;
+        document.getElementById("sb-uptime").textContent = ts;
+      }, 1000);
+
+      // Mobile quick commands
+      $(document).ready(function () {
+        $(".qc-btn").on("click touchend", function (e) {
+          e.preventDefault();
+          $(".input").val($(this).data("command"));
+          var ev = $.Event("keypress");
+          ev.which = 13;
+          $(".input").trigger(ev);
+        });
+
+        if (window.innerWidth > 768) $(".input").focus();
+
+        $(".term-wrap").on("click", function (e) {
+          if (!$(e.target).is("button,a,input,.qc-btn")) $(".input").focus();
+        });
+      });
+
+      // Keyboard shortcuts
+      document.addEventListener("keydown", function (e) {
+        if (e.ctrlKey && e.key === "l") {
+          e.preventDefault();
+          $(".input").val("clear");
+          var ev = $.Event("keypress");
+          ev.which = 13;
+          $(".input").trigger(ev);
+        }
+        if (e.key === "F1") {
+          e.preventDefault();
+          $(".input").val("help");
+          var ev = $.Event("keypress");
+          ev.which = 13;
+          $(".input").trigger(ev);
+        }
+      });
+    </script>
+  </body>
 </html>
